@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Playwright
+.playwright/
+test-results/
+
+# Pytest
+.pytest_cache/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
