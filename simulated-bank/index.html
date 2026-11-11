@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MboaPay — Portail Financier Numérique Cameroun</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇨🇲</text></svg>">
+    <link rel="stylesheet" href="/bank/design-system.css">
+    <style>
+        /* Inlined Fallback Tokens in case of standalone file preview */
+        :root {
+            --bg-base: #0c0f14;
+            --bg-surface-1: #151821;
+            --bg-surface-2: #1b1f2a;
+            --bg-surface-3: #222736;
+            --bg-surface-hero: #3e5bf2;
+            --accent-lime: #d8ff3e;
+            --accent-lime-hover: #c6f028;
+            --accent-lime-glow: rgba(216, 255, 62, 0.35);
+            --accent-lime-text: #0c0f14;
+            --accent-blue: #3e5bf2;
+            --accent-blue-glow: rgba(62, 91, 242, 0.4);
+            --text-primary: #ffffff;
+            --text-secondary: #8e95a5;
+            --text-muted: #5e6678;
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-focus: rgba(216, 255, 62, 0.55);
+            --status-warning-bg: rgba(244, 63, 94, 0.12);
+            --status-warning-border: rgba(244, 63, 94, 0.35);
+            --status-warning-text: #fb7185;
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --radius-pill: 9999px;
+            --shadow-card: 0 12px 32px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border-subtle);
+            --shadow-floating: 0 20px 40px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", Inter, "Segoe UI", Roboto, sans-serif; }
+        
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 12% 8%, rgba(34, 197, 94, 0.09) 0%, transparent 45%),
+                radial-gradient(circle at 88% 22%, rgba(62, 91, 242, 0.11) 0%, transparent 50%),
+                radial-gradient(circle at 50% 85%, rgba(216, 255, 62, 0.04) 0%, transparent 50%);
+            color: var(--text-primary);
+            padding-bottom: 120px;
+            min-height: 100vh;
+        }
+
+        /* Top Header Component */
+        .app-header {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 1.5rem 1.25rem 0.5rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-meta-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 2px solid var(--border-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            position: relative;
+        }
+        .user-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border: 2px solid var(--bg-base);
+        }
+        .user-greetings-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .user-greetings-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .icon-btn-glass {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--bg-surface-1);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .icon-btn-glass:hover {
+            background: var(--bg-surface-2);
+            border-color: var(--border-medium);
+        }
+        .alert-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f97316;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        /* Hero Page Title */
+        .page-intro {
+            max-width: 1000px;
+            margin: 0.8rem auto 1.2rem auto;
+            padding: 0 1.25rem;
+        }
+        .page-intro h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
+            color: var(--text-primary);
+        }
+
+        /* Segmented Filter Pills */
+        .filter-section {
+            max-width: 1000px;
+            margin: 0 auto 1.5rem auto;
+            padding: 0 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .segmented-track {
+            background: var(--bg-surface-1);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-pill);
+            padding: 4px;
+            display: inline-flex;
+            gap: 4px;
+        }
+        .segmented-pill {
+            padding: 8px 20px;
+            border-radius: var(--radius-pill);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            border: none;
+            background: transparent;
+        }
+        .segmented-pill.active {
+            background: var(--accent-lime);
+            color: var(--accent-lime-text);
+            box-shadow: 0 2px 12px rgba(216, 255, 62, 0.35);
+        }
+        .segmented-pill:hover:not(.active) {
+            color: var(--text-primary);
+            background: var(--bg-surface-2);
+        }
+
+        /* Content Grid */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1.25rem 7.5rem 1.25rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 820px) {
+            .container { 
+                grid-template-columns: 1fr;
+                padding-bottom: 8.5rem;
+            }
+        }
+        .full-width { grid-column: 1 / -1; }
+
+        /* Hero Balance Card (Electric Cobalt Blue) */
+        .card-hero-blue {
+            background: linear-gradient(135deg, #415ff6 0%, #2944d1 100%);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            color: white;
+            box-shadow: 0 14px 35px rgba(41, 68, 209, 0.35);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 230px;
+        }
+        .card-hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .card-hero-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .arrow-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            color: white;
+            transition: transform 0.2s;
+        }
+        .card-hero-blue:hover .arrow-badge {
+            transform: translate(2px, -2px);
+        }
+        .balance-value {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 1rem 0 0.5rem 0;
+            letter-spacing: -0.8px;
+        }
+        .hero-account-id {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 0.5px;
+        }
+        .hero-waveform-svg {
+            position: absolute;
+            right: -20px;
+            bottom: -15px;
+            opacity: 0.15;
+            width: 220px;
+            pointer-events: none;
+        }
+
+        /* Dark Surface Cards */
+        .card-dark {
+            background-color: var(--bg-surface-1);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.6rem;
+            box-shadow: var(--shadow-card);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Dual Stat Sub-cards (Reference middle screen) */
+        .stats-dual-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 1.2rem;
+        }
+        .stat-subcard {
+            background: var(--bg-surface-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            position: relative;
+        }
+        .stat-subcard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .stat-subcard-val {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .badge-pill-green {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: var(--radius-pill);
+        }
+
+        /* Form Inputs */
+        .form-group { margin-bottom: 1.1rem; }
+        label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.45rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .input-dark {
+            width: 100%;
+            background-color: var(--bg-surface-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.85rem 1.1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .input-dark:focus {
+            outline: none;
+            border-color: var(--accent-lime);
+            box-shadow: 0 0 0 3px rgba(216, 255, 62, 0.2);
+            background-color: var(--bg-surface-3);
+        }
+
+        /* Fee Breakdown Box */
+        .fee-breakdown {
+            background-color: var(--bg-surface-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 1.1rem;
+            margin: 1.2rem 0;
+        }
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .fee-row span:last-child {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .fee-row.total {
+            font-weight: 700;
+            color: var(--text-primary);
+            border-top: 1px dashed var(--border-medium);
+            padding-top: 0.6rem;
+            margin-top: 0.6rem;
+            font-size: 1.05rem;
+        }
+        .fee-row.total span:last-child {
+            color: var(--accent-lime);
+            font-size: 1.15rem;
+        }
+
+        /* Primary Button (Electric Lime) */
+        .btn-lime {
+            width: 100%;
+            background-color: var(--accent-lime);
+            color: var(--accent-lime-text);
+            border: none;
+            padding: 0.95rem 1.4rem;
+            border-radius: var(--radius-pill);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px var(--accent-lime-glow);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-lime:hover {
+            background-color: var(--accent-lime-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 28px rgba(216, 255, 62, 0.45);
+        }
+
+        /* Security Warning Card */
+        .warning-card-dark {
+            background: rgba(159, 18, 57, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        .warning-icon-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(244, 63, 94, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .warning-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fb7185;
+            margin-bottom: 0.2rem;
+        }
+        .warning-text {
+            font-size: 0.85rem;
+            color: #fecdd3;
+            line-height: 1.4;
+        }
+
+        /* Dynamic Alert Banner */
+        #dynamic-notice-area { margin-bottom: 1rem; }
+        .dynamic-banner {
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            color: #fef08a;
+            padding: 1rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            animation: slideDown 0.3s ease-out;
+            margin-bottom: 1rem;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Success Card */
+        #transaction-success {
+            display: none;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #86efac;
+            padding: 1.2rem;
+            border-radius: var(--radius-md);
+            margin-top: 1rem;
+        }
+
+        /* Conditions List */
+        .conditions-list { list-style: none; }
+        .conditions-list li {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.6rem;
+            position: relative;
+            padding-left: 20px;
+            line-height: 1.4;
+        }
+        .conditions-list li::before {
+            content: "•";
+            position: absolute;
+            left: 4px;
+            color: var(--accent-lime);
+            font-size: 1.2rem;
+            top: -3px;
+        }
+
+        /* ============================================================ */
+        /* FLOATING BOTTOM NAVIGATION DOCK (EXACT REFERENCE REPLICATION) */
+        /* ============================================================ */
+        .bottom-nav-dock {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(21, 24, 33, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-pill);
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-floating);
+            z-index: 900;
+        }
+        .dock-item {
+            width: 46px;
+            height: 46px;
+            border-radius: var(--radius-pill);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            font-size: 1.2rem;
+        }
+        .dock-item:hover {
+            color: var(--text-primary);
+            background: var(--bg-surface-2);
+        }
+        .dock-item.active {
+            background: var(--accent-lime);
+            color: var(--accent-lime-text);
+            box-shadow: 0 4px 14px rgba(216, 255, 62, 0.35);
+        }
+
+        /* ============================================================ */
+        /* MBOA AI FLOATING VOICE ASSISTANT OVERLAY */
+        /* ============================================================ */
+        #mboa-assistant-bubble-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: var(--accent-lime);
+            color: var(--accent-lime-text);
+            box-shadow: 0 8px 25px rgba(216, 255, 62, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9999;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 3px solid #0c0f14;
+        }
+        #mboa-assistant-bubble-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 30px rgba(216, 255, 62, 0.65);
+        }
+        body.assistant-open #mboa-assistant-bubble-btn {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.7);
+        }
+        .ai-cameroon-flag {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            font-size: 1.05rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        /* Assistant Modal Panel */
+        #mboa-assistant-panel {
+            position: fixed;
+            bottom: 95px;
+            right: 25px;
+            width: 395px;
+            max-width: calc(100vw - 40px);
+            height: 590px;
+            max-height: calc(100vh - 120px);
+            background: #12151b;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-medium);
+            display: none;
+            flex-direction: column;
+            z-index: 9998;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 820px) {
+            #mboa-assistant-bubble-btn {
+                bottom: 86px;
+                right: 18px;
+                width: 52px;
+                height: 52px;
+            }
+            #mboa-assistant-panel {
+                bottom: 86px;
+                right: 12px;
+                left: 12px;
+                width: calc(100vw - 24px);
+                max-width: 100vw;
+                height: calc(100vh - 110px);
+            }
+        }
+
+        .assistant-header {
+            background: var(--bg-surface-1);
+            border-bottom: 1px solid var(--border-subtle);
+            color: white;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .assistant-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+        .assistant-header-close {
+            background: var(--bg-surface-2);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .assistant-header-close:hover {
+            color: white;
+            border-color: var(--border-medium);
+        }
+
+        .assistant-lang-bar {
+            background: var(--bg-surface-2);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .lang-select {
+            padding: 0.35rem 0.75rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-surface-1);
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .assistant-chat-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            background: #0f1218;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 0.85rem 1.1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+        .chat-bubble.user {
+            align-self: flex-end;
+            background: var(--accent-blue);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 14px rgba(62, 91, 242, 0.3);
+        }
+        .chat-bubble.ai {
+            align-self: flex-start;
+            background: var(--bg-surface-1);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-bubble-speaker {
+            display: inline-block;
+            cursor: pointer;
+            margin-left: 6px;
+            color: var(--accent-lime);
+        }
+
+        /* Two-phase Confirmation Card in Assistant */
+        .confirm-card {
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.84rem;
+        }
+        .confirm-card-title {
+            font-weight: 700;
+            color: #fde047;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .confirm-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 0.85rem;
+        }
+        .btn-confirm-yes {
+            background: var(--accent-lime);
+            color: var(--accent-lime-text);
+            border: none;
+            padding: 0.65rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+        }
+        .btn-confirm-yes:hover {
+            background: var(--accent-lime-hover);
+            box-shadow: 0 4px 12px rgba(216, 255, 62, 0.3);
+        }
+        .btn-confirm-no {
+            background: rgba(244, 63, 94, 0.2);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            padding: 0.65rem;
+            border-radius: var(--radius-pill);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.82rem;
+        }
+
+        /* Quick Chips Bar */
+        .quick-chips {
+            padding: 0.6rem 0.85rem;
+            background: var(--bg-surface-1);
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .chip {
+            background: var(--bg-surface-2);
+            border: 1px solid var(--border-subtle);
+            padding: 5px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chip:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-lime);
+            background: var(--bg-surface-3);
+        }
+
+        /* Assistant Footer */
+        .assistant-footer {
+            padding: 0.85rem 1rem;
+            background: var(--bg-surface-1);
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .assistant-input {
+            flex: 1;
+            padding: 0.65rem 1rem;
+            background: var(--bg-surface-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-pill);
+            font-size: 0.88rem;
+            color: var(--text-primary);
+        }
+        .assistant-input:focus {
+            outline: none;
+            border-color: var(--accent-lime);
+        }
+        .mic-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--accent-lime);
+            color: var(--accent-lime-text);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+        .mic-btn.recording {
+            background: #ef4444;
+            color: white;
+            animation: pulseRecord 1s infinite;
+        }
+        @keyframes pulseRecord {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .send-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--bg-surface-2);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .send-btn:hover { color: var(--text-primary); border-color: var(--border-medium); }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="user-meta-box">
+            <div class="user-avatar-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="user-status-dot"></span>
+            </div>
+            <div>
+                <p class="user-greetings-sub">MboaPay Microfinance</p>
+                <h2 class="user-greetings-name">Emmanuel Rostand</h2>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn-glass" onclick="triggerDemoAlert()" title="Déclencher alerte de sécurité">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                <span class="alert-dot"></span>
+            </button>
+            <span style="font-size: 1.3rem;" title="Cameroun">🇨🇲</span>
+        </div>
+    </header>
+
+    <!-- Page Intro Title -->
+    <div class="page-intro">
+        <h1>Opérations & Services</h1>
+    </div>
+
+    <!-- Segmented Tabs (Reference Visual Match) -->
+    <div class="filter-section">
+        <div class="segmented-track">
+            <button class="segmented-pill active">Tous</button>
+            <button class="segmented-pill">Transfert MoMo</button>
+            <button class="segmented-pill">Orange Money</button>
+            <button class="segmented-pill">Tontines / Njangi</button>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary); font-family: monospace;">
+            CM21-10005-00012345678-89
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container">
+        <!-- Security Warning Banner (Shielded by Integrity Validator) -->
+        <div class="full-width">
+            <div id="dynamic-notice-area"></div>
+
+            <div class="warning-card-dark" id="security-warning-banner">
+                <div class="warning-icon-circle">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                    <div class="warning-title">Avertissement de sécurité</div>
+                    <div class="warning-text">Ne partagez jamais votre code secret PIN ou mot de passe à qui que ce soit, même à un agent bancaire. MboaPay ne vous demandera jamais vos identifiants secrets.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Column: Hero Balance & Stats -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Hero Balance Card (Electric Cobalt Blue) -->
+            <div class="card-hero-blue">
+                <div class="card-hero-top">
+                    <div class="card-hero-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                        <span>Compte Courant Principal</span>
+                    </div>
+                    <div class="arrow-badge">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.75);">Solde disponible</div>
+                    <div class="balance-value" id="account-balance">150 000 FCFA</div>
+                    <p class="hero-account-id">Réseau national — Yaoundé / Douala</p>
+                </div>
+
+                <!-- Decorative Audio/Waveform SVG -->
+                <svg class="hero-waveform-svg" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 30 Q 25 10, 50 30 T 100 30 T 150 30 T 200 30" stroke="white" stroke-width="4" fill="none"/>
+                    <path d="M0 30 Q 25 45, 50 30 T 100 30 T 150 30 T 200 30" stroke="white" stroke-width="2" fill="none" opacity="0.6"/>
+                </svg>
+            </div>
+
+            <!-- Dual Stats Cards (Reference Archetype) -->
+            <div class="stats-dual-row">
+                <div class="stat-subcard fee-card">
+                    <div class="stat-subcard-header">
+                        <span>Frais standard</span>
+                        <span class="badge-pill-green">Fixe</span>
+                    </div>
+                    <div class="stat-subcard-val fee-val" id="cond-3">250 FCFA</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Par opération mobile</div>
+                </div>
+
+                <div class="stat-subcard">
+                    <div class="stat-subcard-header">
+                        <span>Plafond journalier</span>
+                        <span class="badge-pill-green">Max</span>
+                    </div>
+                    <div class="stat-subcard-val" id="cond-1">500 000 FCFA</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;" id="cond-2">Délai: Immédiat</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Transfer Form Card -->
+        <div class="card-dark">
+            <h2 class="card-title">
+                <span class="title-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </span>
+                <span>Transférer de l'argent</span>
+            </h2>
+
+            <form id="transfer-form" onsubmit="event.preventDefault(); submitTransfer();">
+                <div class="form-group">
+                    <label for="recipient">Numéro du bénéficiaire (MTN / Orange)</label>
+                    <input type="text" id="recipient" name="recipient" class="input-dark" placeholder="Ex: 699001122" value="699001122" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Montant du transfert</label>
+                    <input type="text" id="amount" name="amount" class="input-dark" placeholder="Ex: 25000" value="25000" oninput="updateBreakdown()" required>
+                </div>
+
+                <div class="fee-breakdown">
+                    <div class="fee-row">
+                        <span>Montant du transfert :</span>
+                        <span id="breakdown-amount">25 000 FCFA</span>
+                    </div>
+                    <div class="fee-row">
+                        <span>Frais de transfert :</span>
+                        <span id="breakdown-fee" class="fee-val">250 FCFA</span>
+                    </div>
+                    <div class="fee-row total">
+                        <span>Total débité :</span>
+                        <span id="breakdown-total">25 250 FCFA</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-transfer" class="btn-lime">Confirmer le transfert simulé</button>
+            </form>
+
+            <div id="transaction-success">
+                <strong>✅ Opération confirmée avec succès !</strong>
+                <p id="success-desc" style="font-size: 0.85rem; margin-top: 4px; color: #bbf7d0;">Le transfert de 25 000 FCFA vers le 699001122 a été exécuté sur la passerelle simulée.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- FLOATING BOTTOM NAVIGATION DOCK (REFERENCE REPLICATION) -->
+    <!-- ============================================================ -->
+    <nav class="bottom-nav-dock" aria-label="Navigation principale">
+        <button class="dock-item active" title="Accueil" onclick="switchNav(this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
+        <button class="dock-item" title="Tontines & Échéances" onclick="switchNav(this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        </button>
+        <button class="dock-item" title="Assistant Vocal Mboa" onclick="toggleAssistantPanel()" style="color: var(--accent-lime);" aria-label="Ouvrir assistant vocal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+        </button>
+        <button class="dock-item" title="Statistiques & Activités" onclick="switchNav(this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+        </button>
+        <button class="dock-item" title="Paramètres & Sécurité" onclick="switchNav(this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- FLOATING ASSISTANT OVERLAY TRIGGER & MODAL -->
+    <!-- ============================================================ -->
+    <div id="mboa-assistant-bubble-btn" onclick="toggleAssistantPanel()" title="Ouvrir l'assistant Mboa Finance AI">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+        <span class="ai-cameroon-flag">🇨🇲</span>
+    </div>
+
+    <div id="mboa-assistant-panel">
+        <div class="assistant-header">
+            <div class="assistant-header-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-lime)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="8" rx="2"/><path d="M12 2v6"/><circle cx="8" cy="14" r="1.5"/><circle cx="16" cy="14" r="1.5"/><path d="M9 17h6"/></svg>
+                <span>Mboa Finance AI</span>
+                <span style="font-size: 0.65rem; background: rgba(216, 255, 62, 0.2); color: var(--accent-lime); padding: 2px 8px; border-radius: 9999px; font-weight: 700;">SAFINUM</span>
+            </div>
+            <button class="assistant-header-close" onclick="toggleAssistantPanel()">✕</button>
+        </div>
+
+        <div class="assistant-lang-bar">
+            <span>Langue vocale :</span>
+            <select id="assistant-lang-select" class="lang-select" onchange="onLanguageChange(this.value)">
+                <option value="fra" selected>Français</option>
+                <option value="eng">English</option>
+                <option value="fuv">Fulfulde (Nord)</option>
+                <option value="ewo">Ewondo (Centre)</option>
+                <option value="bum">Bulu (Sud)</option>
+                <option value="bbj">Ghomálá' (Ouest)</option>
+                <option value="dua">Duala (Littoral)</option>
+                <option value="pcm">Cameroonian Pidgin</option>
+            </select>
+        </div>
+
+        <div class="assistant-chat-body" id="assistant-chat-body">
+            <div class="chat-bubble ai">
+                👋 <strong>Bonjour ! Jam tan ! Mbolo !</strong><br>
+                Je suis <strong>Mboa Finance AI</strong>. Je lis votre interface financière, explique vos soldes et frais, et prépare vos transferts en toute sécurité. Parlez ou choisissez une action :
+            </div>
+        </div>
+
+        <!-- Quick Chips Bar -->
+        <div class="quick-chips" id="quick-chips-bar">
+            <div class="chip" onclick="sendQuickPrompt('Montre-moi mon solde disponible')">📊 Solde</div>
+            <div class="chip" onclick="sendQuickPrompt('Explique les frais de transfert')">💡 Frais</div>
+            <div class="chip" onclick="sendQuickPrompt('Je veux envoyer 25000 FCFA au 699001122')">💸 Envoyer 25 000</div>
+            <div class="chip" onclick="sendQuickPrompt('Traduire la page')">🌐 Traduire interface</div>
+        </div>
+
+        <div class="assistant-footer">
+            <button id="mic-toggle-btn" class="mic-btn" onclick="toggleMicrophone()" title="Parler à l'agent">
+                🎤
+            </button>
+            <input type="text" id="assistant-input-field" class="assistant-input" placeholder="Parlez ou écrivez ici..." onkeypress="handleInputKey(event)">
+            <button class="send-btn" onclick="submitUserMessage()" title="Envoyer">➤</button>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Player for Synthesized Responses -->
+    <audio id="mboa-audio-player" style="display:none;"></audio>
+
+    <script>
+        let currentSessionId = "session_" + Date.now();
+        let currentLanguage = "fra";
+        let isRecording = false;
+        let mediaStream = null;
+
+        const promptChipsByLang = {
+            fra: [
+                { label: "📊 Solde", prompt: "Montre-moi mon solde disponible" },
+                { label: "💡 Frais", prompt: "Explique les frais de transfert" },
+                { label: "💸 Envoyer 25k", prompt: "Je veux envoyer 25000 FCFA au 699001122" },
+                { label: "🌐 Traduire", prompt: "Traduire la page" }
+            ],
+            eng: [
+                { label: "📊 Balance", prompt: "Show me my available balance" },
+                { label: "💡 Fees", prompt: "Explain the transfer charges" },
+                { label: "💸 Send 25k", prompt: "I want to send 25000 FCFA to 699001122" },
+                { label: "🌐 Translate", prompt: "Translate the page to English" }
+            ],
+            fuv: [
+                { label: "📊 Ceede", prompt: "Holle yam ceede am keddiiɗe" },
+                { label: "💡 Coggu", prompt: "Famnin am coggu neldol ngol" },
+                { label: "💸 Neldugo 25k", prompt: "Mi yiɗi neldugo 25000 FCFA haa 699001122" },
+                { label: "🌐 Firo", prompt: "Firtu ɗerewol ngol e Fulfulde" }
+            ],
+            ewo: [
+                { label: "📊 Moni", prompt: "Lere ma moni me ne wom" },
+                { label: "💡 Mintol", prompt: "Fandan ma moni mintol" },
+                { label: "💸 Lɔm 25k", prompt: "Ma kɔŋ ô lɔm 25000 FCFA asu 699001122" },
+                { label: "🌐 Traduire", prompt: "Fiti foé nyi e Ewondo" }
+            ],
+            bum: [
+                { label: "📊 Moni", prompt: "Lere ma moni wom" },
+                { label: "💡 Minlemba", prompt: "Kat ma minlemba m'asik" },
+                { label: "💸 Lôm 25k", prompt: "Ma kômbô lôm 25000 FCFA asu 699001122" }
+            ],
+            bbj: [
+                { label: "📊 Nkáp", prompt: "Zǎk ma nkáp yəm" },
+                { label: "💡 Fa' nkáp", prompt: "Tsyɛ́ mǎ fa' nkáp le" },
+                { label: "💸 Sɔ̂ 25k", prompt: "Mə̀ kɔ́' sɔ̂ 25000 FCFA fa' 699001122" }
+            ],
+            dua: [
+                { label: "📊 Moto", prompt: "Bolo mba moto mwam" },
+                { label: "💡 Ndando", prompt: "Tele mba ndando ya loma" },
+                { label: "💸 Loma 25k", prompt: "Na mapula loma 25000 FCFA na 699001122" }
+            ],
+            pcm: [
+                { label: "📊 Balance", prompt: "Show me ma balance" },
+                { label: "💡 Charges", prompt: "Explain di money wey dem dey cut" },
+                { label: "💸 Send 25k", prompt: "I wan send 25000 FCFA give 699001122" },
+                { label: "🌐 Translate", prompt: "Translate this page to Pidgin" }
+            ]
+        };
+
+        function toggleAssistantPanel() {
+            const panel = document.getElementById('mboa-assistant-panel');
+            const isOpening = panel.style.display !== 'flex';
+            panel.style.display = isOpening ? 'flex' : 'none';
+            if (isOpening) {
+                document.body.classList.add('assistant-open');
+                document.getElementById('assistant-input-field').focus();
+            } else {
+                document.body.classList.remove('assistant-open');
+            }
+        }
+
+        function switchNav(el) {
+            document.querySelectorAll('.dock-item').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function onLanguageChange(lang) {
+            currentLanguage = lang;
+            renderQuickChips(lang);
+            addChatMessage("ai", `Langue sélectionnée: <strong>${lang.toUpperCase()}</strong>. Vous pouvez parler ou choisir une action rapide.`);
+        }
+
+        function renderQuickChips(lang) {
+            const chipsBar = document.getElementById('quick-chips-bar');
+            const chips = promptChipsByLang[lang] || promptChipsByLang.fra;
+            chipsBar.innerHTML = chips.map(c => 
+                `<div class="chip" onclick="sendQuickPrompt('${c.prompt}')">${c.label}</div>`
+            ).join('');
+        }
+
+        function sendQuickPrompt(prompt) {
+            document.getElementById('assistant-input-field').value = prompt;
+            submitUserMessage();
+        }
+
+        function handleInputKey(e) {
+            if (e.key === 'Enter') submitUserMessage();
+        }
+
+        async function submitUserMessage() {
+            const input = document.getElementById('assistant-input-field');
+            const query = input.value.trim();
+            if (!query) return;
+
+            addChatMessage("user", query);
+            input.value = "";
+
+            const typingId = addChatMessage("ai", "<em>Réflexion et analyse de l'interface en cours...</em>");
+
+            try {
+                const response = await fetch('/api/v1/agent/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        user_input: query,
+                        language: currentLanguage
+                    })
+                });
+
+                const data = await response.json();
+                removeChatMessage(typingId);
+
+                let formattedExplanation = data.explanation;
+                let cardHtml = "";
+
+                if (data.prepared_transaction && data.requires_user_confirmation) {
+                    const tx = data.prepared_transaction;
+                    cardHtml = `
+                    <div class="confirm-card">
+                        <div class="confirm-card-title">⚠️ Confirmation d'opération requise</div>
+                        <div><strong>Bénéficiaire :</strong> ${tx.beneficiary_account}</div>
+                        <div><strong>Montant :</strong> ${tx.amount.toLocaleString()} ${tx.currency}</div>
+                        <div><strong>Frais :</strong> ${tx.fee.toLocaleString()} ${tx.currency}</div>
+                        <div><strong>Total débité :</strong> ${tx.total_debit.toLocaleString()} ${tx.currency}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Vérification : ${tx.verification_status}</div>
+                        <div class="confirm-actions">
+                            <button class="btn-confirm-yes" onclick="confirmPreparedTransaction('${tx.transaction_id}')">✓ Confirmer</button>
+                            <button class="btn-confirm-no" onclick="cancelPreparedTransaction('${tx.transaction_id}')">✕ Annuler</button>
+                        </div>
+                    </div>`;
+                }
+
+                addChatMessage("ai", formattedExplanation + cardHtml, data.audio_base64);
+
+                if (data.audio_base64) {
+                    playAudioBase64(data.audio_base64);
+                }
+
+            } catch (err) {
+                removeChatMessage(typingId);
+                addChatMessage("ai", "⚠️ Impossible de contacter le backend Mboa Finance AI sur le port 8000.");
+            }
+        }
+
+        async function confirmPreparedTransaction(txId) {
+            addChatMessage("user", "Je confirme le transfert.");
+            try {
+                const resp = await fetch('/api/v1/transaction/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        transaction_id: txId,
+                        confirmed: true,
+                        user_speech_acknowledgment: "Explicit confirmation in UI"
+                    })
+                });
+                const tx = await resp.json();
+                addChatMessage("ai", `✅ Opération <strong>${tx.transaction_id}</strong> confirmée avec succès ! Les fonds simulés ont été transférés.`);
+                document.getElementById('transaction-success').style.display = 'block';
+                document.getElementById('submit-transfer').style.display = 'none';
+            } catch (err) {
+                addChatMessage("ai", "❌ Erreur lors de la confirmation de la transaction.");
+            }
+        }
+
+        function cancelPreparedTransaction(txId) {
+            addChatMessage("user", "J'annule l'opération.");
+            addChatMessage("ai", "L'opération a été annulée. Aucun frais n'a été prélevé.");
+        }
+
+        function addChatMessage(role, htmlText, audioB64 = null) {
+            const body = document.getElementById('assistant-chat-body');
+            const bubble = document.createElement('div');
+            const id = 'msg_' + Date.now();
+            bubble.id = id;
+            bubble.className = 'chat-bubble ' + role;
+            
+            let speakerIcon = "";
+            if (audioB64) {
+                speakerIcon = ` <span class="chat-bubble-speaker" onclick="playAudioBase64('${audioB64}')" title="Réécouter">🔊</span>`;
+            }
+            bubble.innerHTML = htmlText + speakerIcon;
+            body.appendChild(bubble);
+            body.scrollTop = body.scrollHeight;
+            return id;
+        }
+
+        function removeChatMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function playAudioBase64(b64) {
+            const player = document.getElementById('mboa-audio-player');
+            player.src = 'data:audio/wav;base64,' + b64;
+            player.play().catch(e => console.log('Audio autoplay prevented or error:', e));
+        }
+
+        async function toggleMicrophone() {
+            const btn = document.getElementById('mic-toggle-btn');
+            if (!isRecording) {
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    isRecording = true;
+                    btn.classList.add('recording');
+                    btn.innerHTML = '⏹️';
+                    addChatMessage("ai", "<em>Écoute en cours... Parlez naturellement dans votre langue.</em>");
+                } catch (e) {
+                    alert("Autorisation microphone non accordée. Vous pouvez utiliser les suggestions rapides ou taper votre requête.");
+                }
+            } else {
+                isRecording = false;
+                btn.classList.remove('recording');
+                btn.innerHTML = '🎤';
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(t => t.stop());
+                }
+                const sample = promptChipsByLang[currentLanguage] ? promptChipsByLang[currentLanguage][0].prompt : "Montre-moi mon solde";
+                document.getElementById('assistant-input-field').value = sample;
+                submitUserMessage();
+            }
+        }
+
+        function updateBreakdown() {
+            const rawAmount = document.getElementById('amount').value.replace(/\D/g, '');
+            const amount = parseInt(rawAmount) || 0;
+            const fee = amount > 0 ? 250 : 0;
+            const total = amount + fee;
+
+            document.getElementById('breakdown-amount').innerText = amount.toLocaleString('fr-FR') + ' FCFA';
+            document.getElementById('breakdown-fee').innerText = fee.toLocaleString('fr-FR') + ' FCFA';
+            document.getElementById('breakdown-total').innerText = total.toLocaleString('fr-FR') + ' FCFA';
+        }
+
+        function submitTransfer() {
+            document.getElementById('transaction-success').style.display = 'block';
+            document.getElementById('submit-transfer').style.display = 'none';
+        }
+
+        function triggerDemoAlert() {
+            window.triggerDynamicAlert("Avertissement de sécurité: Maintenance planifiée des services Mobile Money de 02h00 à 04h00. Aucun frais supplémentaire ne sera facturé.");
+        }
+
+        window.triggerDynamicAlert = function(msg) {
+            const area = document.getElementById('dynamic-notice-area');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'dynamic-banner';
+            alertDiv.id = 'dynamic-notice-' + Date.now();
+            alertDiv.setAttribute('data-dynamic', 'true');
+            alertDiv.innerText = msg || "Alerte de sécurité: Maintenance planifiée des serveurs bancaires ce soir de 02h00 à 04h00.";
+            area.appendChild(alertDiv);
+        };
+
+        renderQuickChips('fra');
+    </script>
+</body>
+</html>
