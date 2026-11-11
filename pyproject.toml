@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mboa-finance-ai"
+version = "1.0.0"
+description = "Autonomous, voice-first, multilingual financial accessibility agent for Cameroon"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Mboa Finance AI Team" }
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "websockets>=12.0",
+    "pydantic>=2.6.0",
+    "playwright>=1.42.0",
+    "httpx>=0.27.0",
+    "python-multipart>=0.0.9",
+    "numpy>=1.26.0",
+    "beautifulsoup4>=4.12.3",
+    "pillow>=10.2.0",
+    "pytest>=8.1.0",
+    "pytest-asyncio>=0.23.0"
+]
+
+[project.optional-dependencies]
+ai = [
+    "torch>=2.2.0",
+    "transformers>=4.38.0",
+    "faster-whisper>=1.0.0",
+    "onnxruntime>=1.17.0"
+]
+dev = [
+    "pytest>=8.1.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=24.2.0",
+    "flake8>=7.0.0"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+testpaths = ["tests"]
