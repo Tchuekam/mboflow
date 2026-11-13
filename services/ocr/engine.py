@@ -63,15 +63,18 @@ class OCRFallbackEngine:
 
         # Check for system Tesseract if available
         extracted_text = ""
+        ocr_error_note = None
         try:
             import pytesseract
             extracted_text = pytesseract.image_to_string(processed_img)
-        except Exception:
-            # When Tesseract binary is not installed, evaluate hints or embedded EXIF/metadata
+        except Exception as e:
+            # When Tesseract binary is not installed, evaluate verified hints or return empty
             if known_text_hints:
                 extracted_text = "\n".join(known_text_hints)
             else:
-                extracted_text = "Solde: 150 000 FCFA\nFrais: 250 FCFA\nRecipient: 699001122"
+                ocr_error_note = f"OCR engine (Tesseract) unavailable or failed: {e}. No text extracted."
+                logger.warning(ocr_error_note)
+                extracted_text = ""
 
         # Deterministically extract financial entities from OCR output
         numbers = self.validator.extract_all_numbers(extracted_text)
@@ -112,5 +115,6 @@ class OCRFallbackEngine:
             "all_numbers": numbers,
             "phone_identifiers": phones,
             "balances": [b.model_dump() for b in balances],
-            "fees": [f.model_dump() for f in fees]
+            "fees": [f.model_dump() for f in fees],
+            "note": ocr_error_note or "OCR extraction completed"
         }

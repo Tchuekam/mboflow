@@ -1,22 +1,61 @@
-# Multi-stage optimized Dockerfile for Mboa Finance AI
-FROM python:3.11-slim-bookworm
+# ==============================================================================
+# Multi-Stage Production Dockerfile for MboaFlow
+# Non-root unprivileged container with Playwright, Tesseract OCR, & FFmpeg
+# ==============================================================================
 
-LABEL maintainer="Mboa Finance AI Team"
-LABEL description="Autonomous Multilingual Financial Accessibility Agent (SAFINUM Challenge)"
+# ------------------------------------------------------------------------------
+# Stage 1: Build & Dependencies Stage
+# ------------------------------------------------------------------------------
+FROM python:3.11-slim-bookworm AS builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     DEBIAN_FRONTEND=noninteractive \
-    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml README.md ./
+
+# Create virtual environment and install wheels
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install .
+
+# ------------------------------------------------------------------------------
+# Stage 2: Final Production Runtime Stage
+# ------------------------------------------------------------------------------
+FROM python:3.11-slim-bookworm AS runner
+
+LABEL maintainer="MboaFlow Engineering Team <engineering@mboflow.cm>"
+LABEL description="Autonomous Multilingual Financial Accessibility Agent for Cameroon"
+LABEL version="1.0.0"
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    PATH="/opt/venv/bin:$PATH" \
+    MBOA_DATA_DIR=/app/data \
+    ENVIRONMENT=production
 
 WORKDIR /app
 
-# Install system dependencies including ffmpeg and Playwright prerequisites
+# Install runtime system packages: FFmpeg, Tesseract OCR with French & English, and Chromium dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
-    git \
-    build-essential \
+    tesseract-ocr \
+    tesseract-ocr-fra \
+    tesseract-ocr-eng \
     libglib2.0-0 \
     libnss3 \
     libnspr4 \
@@ -39,26 +78,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libasound2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project specification & dependencies
-COPY pyproject.toml README.md ./
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
 
-# Install pip and Python dependencies
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -e .
+# Install Playwright Chromium headless browser as root into shared system path
+RUN playwright install --with-deps chromium
 
-# Install Playwright Chromium browser and its system dependencies
-RUN python -m playwright install --with-deps chromium
+# Create unprivileged application user and data directory
+RUN groupadd -g 10001 appgroup && \
+    useradd -u 10001 -g appgroup -s /bin/bash -m appuser && \
+    mkdir -p /app/data /ms-playwright && \
+    chown -R appuser:appgroup /app /ms-playwright
 
-# Copy codebase
-COPY . .
+# Copy application source code
+COPY --chown=appuser:appgroup . /app
+
+# Switch to unprivileged user
+USER appuser
 
 # Expose HTTP & WebSocket port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://127.0.0.1:8000/api/v1/health || exit 1
+# Deep Readiness Healthcheck (verifies DB connectivity & service health)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://127.0.0.1:8000/api/v1/health/readiness || exit 1
 
-# Launch backend service
+# Launch backend application
 CMD ["python", "run_backend.py"]
-

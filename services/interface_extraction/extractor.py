@@ -33,8 +33,22 @@ class InterfaceExtractor:
     WARNING_KEYWORDS = ["attention", "avertissement", "ne partagez", "pin", "arnaque", "warning", "caution", "fraud"]
     CONDITION_KEYWORDS = ["condition", "termes", "délai", "plafond", "limite", "terms", "limit"]
 
+    # Security heuristic: Detect prompt injection patterns in third-party or unseen interface strings
+    PROMPT_INJECTION_PATTERNS = [
+        re.compile(r'\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:previous\s+)?(?:instructions|prompts|rules)\b', re.IGNORECASE),
+        re.compile(r'\b(?:system\s+(?:prompt|override|command)|developer\s+mode|jailbreak)\b', re.IGNORECASE),
+        re.compile(r'\b(?:you\s+must|always)\s+(?:transfer|debit|send|confirm)\s+(?:silently|automatically)\b', re.IGNORECASE),
+        re.compile(r'\[\s*(?:system|override|assistant)\s*\]', re.IGNORECASE),
+    ]
+
     def __init__(self):
         self.validator = DeterministicFinancialValidator()
+
+    def detect_prompt_injection(self, text: str) -> bool:
+        """Checks if text contains prompt injection signatures intended to subvert the agent."""
+        if not text:
+            return False
+        return any(pattern.search(text) for pattern in self.PROMPT_INJECTION_PATTERNS)
 
     def extract_from_html(self, html_content: str, page_url: str = "http://localhost") -> DOMExtractionResult:
         """
@@ -69,6 +83,13 @@ class InterfaceExtractor:
                 has_child_elements = any(c.name for c in tag.find_all(True))
                 if has_child_elements:
                     continue
+
+            # Check for adversarial prompt injection in interface text
+            is_injected = self.detect_prompt_injection(tag_text)
+            if is_injected:
+                logger.warning(f"Adversarial prompt injection pattern detected in DOM element: '{tag_text}'")
+                warnings.append("Alerte de sécurité : tentative d'injection de commande dans l'interface détectée et neutralisée.")
+                tag_text = f"[CONTENU NEUTRALISÉ : {tag_text[:40]}...]"
 
             # Classify element type
             el_type = self._classify_element_type(tag, tag_text)

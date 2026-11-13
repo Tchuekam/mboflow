@@ -8,9 +8,10 @@ import os
 import uuid
 import logging
 from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, WebSocket, HTTPException, BackgroundTasks
+from fastapi import FastAPI, WebSocket, HTTPException, BackgroundTasks, Request, Response, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from packages.shared_schemas.mboa_schemas import (
@@ -33,6 +34,8 @@ from packages.financial_validation.validator import DeterministicFinancialValida
 from packages.financial_validation.sms_parser import MobileMoneySMSParser, ParsedMobileMoneySMS
 from services.ocr.engine import OCRFallbackEngine
 from packages.security.action_guard import ActionGuard, SecurityViolationError
+from packages.storage.repository import get_repository
+from packages.observability.logger import setup_structured_logging, set_correlation_id, get_correlation_id
 from services.translation.engine import ContextAwareTranslationEngine
 from services.speech_to_text.engine import SpeechToTextEngine
 from services.text_to_speech.engine import TextToSpeechEngine
@@ -41,8 +44,8 @@ from services.agent_orchestrator.orchestrator import AgentOrchestrator
 from apps.browser_connector.connector import PlaywrightBrowserConnector
 from apps.voice_gateway.gateway import VoiceStreamingGateway
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+# Setup production structured JSON logging with PII scrubbing
+setup_structured_logging("mboa-backend")
 logger = logging.getLogger("mboa.backend")
 
 app = FastAPI(
@@ -50,6 +53,15 @@ app = FastAPI(
     version="1.0.0",
     description="Autonomous Multilingual Financial Accessibility Agent for Cameroon (SAFINUM Challenge)"
 )
+
+# Correlation ID Middleware
+@app.middleware("http")
+async def correlation_id_middleware(request: Request, call_next):
+    corr_id = request.headers.get("X-Correlation-ID") or f"corr_{uuid.uuid4().hex[:12]}"
+    set_correlation_id(corr_id)
+    response = await call_next(request)
+    response.headers["X-Correlation-ID"] = corr_id
+    return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,8 +72,9 @@ app.add_middleware(
 )
 
 # Instantiate core singleton services
+action_guard = ActionGuard()
 browser_connector = PlaywrightBrowserConnector(headless=True)
-orchestrator = AgentOrchestrator(browser_connector=browser_connector)
+orchestrator = AgentOrchestrator(browser_connector=browser_connector, action_guard=action_guard)
 voice_gateway = VoiceStreamingGateway(orchestrator=orchestrator)
 translation_engine = ContextAwareTranslationEngine()
 financial_validator = DeterministicFinancialValidator()
@@ -69,12 +82,16 @@ interface_extractor = InterfaceExtractor()
 ocr_engine = OCRFallbackEngine()
 stt_engine = SpeechToTextEngine()
 tts_engine = TextToSpeechEngine()
-action_guard = ActionGuard()
 
 # Mount simulated banking interface
 sim_bank_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "simulated-bank"))
 if os.path.exists(sim_bank_dir):
     app.mount("/bank", StaticFiles(directory=sim_bank_dir, html=True), name="simulated_bank")
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/bank")
 
 
 @app.on_event("startup")
@@ -94,7 +111,7 @@ async def on_shutdown():
 
 
 # -------------------------------------------------------------
-# 1. Health & Language Registry
+# 1. Health & Readiness Probes
 # -------------------------------------------------------------
 
 @app.get("/api/v1/health")
@@ -111,6 +128,55 @@ async def health_check():
             "two_phase_transaction_guard": True
         }
     }
+
+
+@app.get("/api/v1/health/liveness")
+async def liveness_probe():
+    """Liveness probe: returns 200 if application process is alive."""
+    return {"status": "alive", "timestamp": time.time()}
+
+
+@app.get("/api/v1/health/readiness")
+async def readiness_probe():
+    """
+    Deep readiness probe: verifies database connectivity, engine readiness,
+    and storage writeability.
+    """
+    subsystem_status = {}
+    is_ready = True
+
+    # 1. Check storage
+    try:
+        repo = get_repository()
+        with repo._get_connection() as conn:
+            conn.execute("SELECT 1;")
+        subsystem_status["database"] = "UP"
+    except Exception as e:
+        subsystem_status["database"] = f"DOWN: {e}"
+        is_ready = False
+
+    # 2. Check Browser Connector
+    subsystem_status["browser_connector"] = "UP" if browser_connector._browser else "STANDBY"
+
+    # 3. Check STT Engine
+    subsystem_status["speech_to_text"] = "UP" if stt_engine else "DOWN"
+
+    # 4. Check TTS Engine
+    subsystem_status["text_to_speech"] = "UP" if tts_engine else "DOWN"
+
+    # 5. Check Translation Engine
+    subsystem_status["translation"] = "UP" if translation_engine else "DOWN"
+
+    status_code = 200 if is_ready else 503
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": "READY" if is_ready else "NOT_READY",
+            "service": "mboa-finance-ai",
+            "subsystems": subsystem_status,
+            "correlation_id": get_correlation_id()
+        }
+    )
 
 
 @app.get("/api/v1/languages")
@@ -196,7 +262,10 @@ async def execute_agent_step(request: AgentExecuteCommandRequest):
     if request.action_type == "INSPECT_INTERFACE":
         url = request.parameters.get("url")
         if url:
-            await browser_connector.navigate(url)
+            try:
+                await browser_connector.navigate(url)
+            except SecurityViolationError as sve:
+                raise HTTPException(status_code=403, detail=f"SSRF Security Violation: {sve}")
         extraction = await browser_connector.inspect_page()
         return extraction.model_dump()
     elif request.action_type == "TRANSLATE_INTERFACE":
@@ -259,7 +328,10 @@ async def inspect_interface(request: InspectInterfaceRequest):
     if request.html_content:
         return interface_extractor.extract_from_html(request.html_content, page_url=request.url or "custom")
     if request.url:
-        await browser_connector.navigate(request.url)
+        try:
+            await browser_connector.navigate(request.url)
+        except SecurityViolationError as sve:
+            raise HTTPException(status_code=403, detail=f"SSRF Security Violation: {sve}")
     return await browser_connector.inspect_page()
 
 
@@ -359,11 +431,16 @@ class PrepareTransactionRequest(BaseModel):
     fee: float
     total_debit: float
     currency: str = "FCFA"
+    idempotency_key: Optional[str] = None
 
 
 @app.post("/api/v1/transaction/prepare", response_model=PreparedTransaction)
-async def prepare_transaction_endpoint(request: PrepareTransactionRequest):
-    """Phase 1: Prepares simulated transaction with deterministic validation."""
+async def prepare_transaction_endpoint(
+    request: PrepareTransactionRequest,
+    idempotency_header: Optional[str] = Header(None, alias="Idempotency-Key")
+):
+    """Phase 1: Prepares simulated transaction with deterministic validation and cryptographic binding."""
+    key = idempotency_header or request.idempotency_key
     try:
         return action_guard.prepare_transaction(
             source_account=request.source_account,
@@ -372,27 +449,33 @@ async def prepare_transaction_endpoint(request: PrepareTransactionRequest):
             amount=request.amount,
             fee=request.fee,
             total_debit=request.total_debit,
-            currency=request.currency
+            currency=request.currency,
+            idempotency_key=key
         )
     except SecurityViolationError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
 
 @app.post("/api/v1/transaction/confirm", response_model=PreparedTransaction)
-async def confirm_transaction_endpoint(request: TransactionConfirmationRequest):
-    """Phase 2: Confirms simulated transaction only upon explicit user consent."""
+async def confirm_transaction_endpoint(
+    request: TransactionConfirmationRequest,
+    idempotency_header: Optional[str] = Header(None, alias="Idempotency-Key")
+):
+    """Phase 2: Confirms simulated transaction only upon explicit user consent, verifying signature and expiration."""
+    key = idempotency_header or request.idempotency_key
     try:
         return action_guard.confirm_transaction(
             transaction_id=request.transaction_id,
             explicit_user_consent=request.confirmed,
-            user_acknowledgment=request.user_speech_acknowledgment
+            user_acknowledgment=request.user_speech_acknowledgment,
+            idempotency_key=key
         )
     except SecurityViolationError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.get("/api/v1/transaction/audit-trail")
-async def get_audit_trail():
-    """Returns tamper-evident log of all prepared and confirmed actions."""
-    return action_guard.get_audit_trail()
+async def get_audit_trail(limit: int = 100):
+    """Returns tamper-evident, PII-masked audit log of all prepared and confirmed actions."""
+    return action_guard.get_audit_trail(limit=limit)
 

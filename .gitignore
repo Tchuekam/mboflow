@@ -16,6 +16,11 @@ test-results/
 # Pytest
 .pytest_cache/
 
+# Local databases and runtime data
+data/*.db
+data/*.db-wal
+data/*.db-shm
+
 # OS specific
 .DS_Store
 Thumbs.db
