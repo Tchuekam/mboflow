@@ -1,0 +1,13 @@
+# ==============================================================================
+# MboFlow Development, Testing & Verification Dependencies
+# ==============================================================================
+-r requirements.txt
+
+# Testing Framework & Async Plugins
+pytest>=8.1.0
+pytest-asyncio>=0.23.0
+anyio>=4.0.0
+
+# Code Quality & Formatting
+black>=24.2.0
+flake8>=7.0.0
