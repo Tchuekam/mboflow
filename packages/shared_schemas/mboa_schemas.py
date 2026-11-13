@@ -31,8 +31,10 @@ class TransactionStatus(str, Enum):
     PREPARED = "PREPARED"
     PENDING_CONFIRMATION = "PENDING_CONFIRMATION"
     CONFIRMED = "CONFIRMED"
+    COMPLETED = "COMPLETED"
     CANCELLED = "CANCELLED"
     REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
 
 
 class InterfaceElementType(str, Enum):
@@ -107,14 +109,21 @@ class PreparedTransaction(BaseModel):
     verification_status: VerificationStatus = VerificationStatus.UNVERIFIED
     verification_notes: List[str] = Field(default_factory=list)
     simulated: bool = True
+    simulation_badge: str = "[OPÉRATION SIMULÉE - DÉFI SAFINUM]"
     prepared_at: float
     confirmed_at: Optional[float] = None
+    signature: Optional[str] = None
+    expires_at: Optional[float] = None
+    idempotency_key: Optional[str] = None
+    provider: Optional[str] = None
+    provider_reference: Optional[str] = None
 
 
 class TransactionConfirmationRequest(BaseModel):
     transaction_id: str
     confirmed: bool
     user_speech_acknowledgment: Optional[str] = None
+    idempotency_key: Optional[str] = None
 
 
 class VerificationReport(BaseModel):
@@ -168,11 +177,24 @@ class SynthesisResponse(BaseModel):
 
 
 # Agent Orchestrator Schemas
+class DialogState(str, Enum):
+    IDLE = "IDLE"
+    AWAITING_INPUT = "AWAITING_INPUT"
+    NEED_CLARIFICATION = "NEED_CLARIFICATION"
+    AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION"
+    EXECUTING = "EXECUTING"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+    ERROR = "ERROR"
+
+
 class AgentIntent(str, Enum):
     CHECK_BALANCE = "CHECK_BALANCE"
     EXPLAIN_FEES = "EXPLAIN_FEES"
     PREPARE_TRANSFER = "PREPARE_TRANSFER"
     CONFIRM_TRANSFER = "CONFIRM_TRANSFER"
+    CANCEL_TRANSFER = "CANCEL_TRANSFER"
+    CORRECTION = "CORRECTION"
     EXPLAIN_INTERFACE = "EXPLAIN_INTERFACE"
     TRANSLATE_PAGE = "TRANSLATE_PAGE"
     HELP = "HELP"
@@ -206,3 +228,8 @@ class AgentMessageResponse(BaseModel):
     prepared_transaction: Optional[PreparedTransaction] = None
     extracted_data: Optional[Dict[str, Any]] = None
     requires_user_confirmation: bool = False
+    dialog_state: DialogState = DialogState.IDLE
+    missing_parameters: List[str] = Field(default_factory=list)
+    is_simulated: bool = True
+    simulation_badge: str = "[OPÉRATION SIMULÉE - DÉFI SAFINUM]"
+    data_provenance: Dict[str, str] = Field(default_factory=dict)
