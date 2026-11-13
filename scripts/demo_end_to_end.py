@@ -1,5 +1,5 @@
-"""
-Mboa Finance AI — Full End-to-End Live Demonstration Runner.
+﻿"""
+Mboa Finance AI â€” Full End-to-End Live Demonstration Runner.
 Demonstrates the full autonomous pipeline across Cameroonian national languages,
 real-time interface inspection, live translation, deterministic integrity validation,
 dynamic notification ingestion, and simulated two-phase transaction execution.
@@ -36,7 +36,7 @@ logger = logging.getLogger("mboa.demo")
 
 async def run_end_to_end_demonstration():
     print("=" * 80)
-    print("  MBOA FINANCE AI — LIVE MULTILINGUAL DEMONSTRATION (SAFINUM CHALLENGE)")
+    print("  MBOA FINANCE AI â€” LIVE MULTILINGUAL DEMONSTRATION (SAFINUM CHALLENGE)")
     print("=" * 80)
     print("Initializing browser automation connector & neural agent engines...\n")
 
@@ -76,7 +76,7 @@ async def run_end_to_end_demonstration():
     print(f"TTS Audio Synthesized: {len(resp1.audio_base64) if resp1.audio_base64 else 0} bytes base64")
     print(f"Latency: {agent_latency:.1f}ms\n")
 
-    # Step 2: Language Switch to Ewondo (Centre Region / Yaoundé)
+    # Step 2: Language Switch to Ewondo (Centre Region / YaoundÃ©)
     print("--------------------------------------------------------------------------------")
     print("STEP 2: USER ASKS IN EWONDO TO TRANSLATE THE ENTIRE INTERFACE")
     print("--------------------------------------------------------------------------------")
@@ -99,7 +99,7 @@ async def run_end_to_end_demonstration():
     print("--------------------------------------------------------------------------------")
     print("STEP 3: USER REQUESTS A TRANSFER (25 000 FCFA -> 699001122)")
     print("--------------------------------------------------------------------------------")
-    user_transfer_cmd = "Je veux envoyer 25000 FCFA au numéro 699001122"
+    user_transfer_cmd = "Je veux envoyer 25000 FCFA au numÃ©ro 699001122"
     print(f"User Request: \"{user_transfer_cmd}\"")
 
     req3 = AgentMessageRequest(
@@ -157,10 +157,10 @@ async def run_end_to_end_demonstration():
     print("Simulating server-side dynamic security alert push into browser DOM...")
     js_dynamic_push = """
     () => {
-        window.triggerDynamicAlert("Avertissement de sécurité: Maintenance planifiée des services Mobile Money de 02h00 à 04h00. Aucun frais supplémentaire ne sera facturé.");
+        window.triggerDynamicAlert("Avertissement de sÃ©curitÃ©: Maintenance planifiÃ©e des services Mobile Money de 02h00 Ã  04h00. Aucun frais supplÃ©mentaire ne sera facturÃ©.");
     }
     """
-    await browser._page.evaluate(js_dynamic_push)
+    await browser._default_page.evaluate(js_dynamic_push)
     await asyncio.sleep(0.5)
 
     mutations = browser.get_dynamic_mutations()
